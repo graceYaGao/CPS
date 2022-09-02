@@ -1,0 +1,266 @@
+* Generate, IC build and energy of molecules in the
+* Lipid All-hydrogen topology and parameter files
+*
+
+!stream toppar.str
+
+set lipid = pvpg
+set Nunit = 50
+
+!
+! generate lipid
+!
+
+read sequence @lipid 1
+generate KPG first none last none setup warn
+
+ic para
+ic seed 1 c1 1 c2 1 c3
+ic build
+
+nbonds atom switch cdie vdw vfswitch  -
+       ctonnb 8.0 ctofnb 10.0 cutnb 12.0 cutim 12.0 -
+       inbfrq -1 imgfrq -1 wmin 1.0 cdie eps 80.0
+
+mini sd   nstep 100
+mini abnr nstep 100
+
+
+!
+! orient lipid A along Z
+!
+
+coor orient
+coor stat
+coor rotate ydir 1.0 phi 90
+coor stat select resname @lipid .and. type P* end
+set zp = ?zave
+coor stat select resname @lipid .and. type C%16 show end
+if ?zave .gt. @zp coor rotate ydir 1.0 phi 180
+coor stat select resname @lipid .and. type P* end
+coor trans zdir -?zave 
+coor trans zdir 20
+coor stat select resname @lipid end
+coor trans xdir -?xave ydir -?yave 
+coor stat
+coor stat select resname @lipid .and. type P* end
+coor stat select resname @lipid .and. type C%16 show end
+
+set mforce =   2.5
+set tforce =   2.5
+stream glip/kpg/membrane_lipid_restraint.str
+
+set fcis   =   250  ! dihedral restraint force constant to keep the chirality
+set fc2    =   250  ! dihedral restraint force constant to keep the chirality
+stream glip/kpg/membrane_lipid_restraint2.str
+
+scalar fbeta set  10.0 select all end
+
+DYNAMICS  start       nstep   5000  timestp  0.001 iprfrq   1000  nprint 1000  -
+          iasvel    1 firstt 300.0  finalt   300.0 tstruc  300.0  -
+          langevin    tbath  300.0  rbuf       0.0 -
+          inbfrq   -1 imgfrq    -1  ihbfrq       0 ilbfrq      0  -
+          iunread  -1  -
+          iunwrite -1  -
+          iuncrd   -1 nsavcrd    0  -
+          iunvelo  -1 nsavvelo   0  -
+          kunit    -1  
+
+MMFP
+GEO reset
+END
+
+!
+! generate and connect the kdo to lipid
+!
+
+stream glip/kpg/kdo.str 
+
+patch LK23B KPG 1 KDO 1 setup warn
+autogenerate angle dihe
+
+ic para
+ic build
+
+cons fix sele .not. hydrogen end
+mini sd   nstep 100
+mini abnr nstep 100
+cons fix sele none end
+
+!setup nonbond option (eps=80)
+set cring  =   250  ! dihedral restraint force constant to keep the sugar chair conformation
+set cimpr  =   250  ! improper restraint force constant to keep the sugar chirality
+stream glip/kpg/carbohydrate_restraint.str
+stream glip/kpg/carbohydrate_improper_restraint.str
+
+nbonds atom switch cdie vdw vfswitch  -
+       ctonnb 10.0 ctofnb 12.0 cutnb 14.0 cutim 14.0 -
+       inbfrq -1 imgfrq -1 wmin 1.0 cdie eps 80.0
+
+set ires = 2
+define ROT sele none end
+label define_rot
+   define XXX sele .bonded. ires @ires .and. .not. ires @ires .and. type O* end
+   define YYY sele XXX .or. .bonded. XXX .and. .not. hydrogen end
+   define ROT sele ROT .or. YYY end
+increase ires by 1
+if ires .le. ?nres goto define_rot
+
+coor copy comp sele resname pvpg end
+
+energy
+
+MOVE ADD MVTP TORS DMAX 360.0 SELE ROT END
+MC NSTEP 3000 INBFrq 1 IECHeck 1
+MOVE DELETE MVIN 1
+
+coor orient rms sele resname pvpg end
+
+mini sd   nstep 100
+mini abnr nstep 100
+
+cons cldh
+
+energy
+
+!
+! generate and connect the polysaccharide to the kdo
+!
+
+stream glip/kpg/ps.str 
+patch SA25BA KDO 7 PS1 1 setup warn
+
+!
+! join everything to a single LPS segment
+!
+
+join KPG KDO renumber
+
+calc i = 1
+label dojoin
+    join KPG PS@i renumber
+increase i by 1
+if i .le. @{Nunit} goto dojoin
+
+autogenerate angle dihe
+
+ic para
+ic build
+
+energy
+
+!
+! make core and o-antigen linear
+!
+
+!setup nonbond option (eps=80)
+nbonds atom switch cdie vdw vfswitch  -
+       ctonnb 10.0 ctofnb 12.0 cutnb 14.0 cutim 14.0 -
+       inbfrq -1 imgfrq -1 wmin 1.0 cdie eps 80.0
+
+energy
+
+! with Z-restraints
+
+coor stat sele resid 2 end
+set zref = ?zave
+
+set ires = 3    ! lipid is resid 1
+label do_zres
+
+   calc zref = @zref + 5
+
+   MMFP
+   GEO plane  RCM -
+       xref 0.0  yref 0.0  zref  @zref  zdir 1.0 -
+       force 10.0 select resid @ires show end
+   END
+
+increase ires by 1
+if ires .le. ?nres goto do_zres
+
+stream glip/kpg/membrane_lipid_restraint.str
+
+set ires = 2
+define ROT sele none end
+label define_rot2
+   define XXX sele .bonded. ires @ires .and. .not. ires @ires .and. type O* end
+   define ROT sele ROT .or. XXX end
+increase ires by 1
+if ires .le. ?nres goto define_rot2
+
+tamd
+   reset
+   set ires = 1
+   label define_clus
+      clus sele ires @ires .and. .not. ROT end
+      clus sele ires @ires .and. ROT end
+      incr ires by 1
+   if ires .le. ?nres goto define_clus
+
+   tree setup
+   tree check
+   tree write unit 6
+ 
+   dyna start echeck -1 -
+        nstep 100000 timestep 0.001 qref 20.0 tref 300.0 first 0.0 -
+        nsavc 0 nprint 5000 iprfrq 1000 nsavv 0 isvfrq -1   -
+        iunrea -1 iunwri -1 iuncrd -1 iunvel -1 -
+        ntrfrq 2000 iasors 1
+end
+
+coor stat select resname @lipid end
+coor trans xdir -?xave ydir -?yave 
+
+set cring  =   250  ! dihedral restraint force constant to keep the sugar chair conformation
+set cimpr  =   250  ! improper restraint force constant to keep the sugar chirality
+stream glip/kpg/carbohydrate_restraint.str
+stream glip/kpg/carbohydrate_improper_restraint.str
+
+! with cylindrical restraints
+MMFP
+GEO reset
+GEO cylinder -
+    Xref 0.0 Yref 0.0 Zref 0.0 XDIR 0.0 YDIR 0.0 ZDIR 1.0 -
+    harmonic FORCE 5.0 droff 5.0 select .not. hydrogen end
+END
+
+stream glip/kpg/membrane_lipid_restraint.str
+
+scalar fbeta set  10.0 select all end
+
+DYNAMICS  start       nstep   5000  timestp  0.001 iprfrq   1000  nprint 1000  -
+          iasvel    1 firstt 300.0  finalt   300.0 tstruc  300.0  -
+          langevin    tbath  300.0  rbuf       0.0 -
+          inbfrq   -1 imgfrq    -1  ihbfrq       0 ilbfrq      0  -
+          iunread  -1  -
+          iunwrite -1  -
+          iuncrd   -1 nsavcrd    0  -
+          iunvelo  -1 nsavvelo   0  -
+          kunit    -1  
+
+!
+! single kpg psf & crd
+!
+
+label writeinfo
+
+energy
+
+open write unit 20 card name glip/kpg/kpg.psf
+write psf  unit 20 card
+
+open write unit 20 card name glip/kpg/kpg.pdb
+write coor unit 20 pdb
+
+open write unit 20 card name glip/kpg/kpg.crd
+write coor unit 20 card
+
+open write unit 10 card name glip/kpg/kpg.xplor_ext.psf
+write psf  unit 10 card xplo 
+
+ioformat noext
+open write unit 10 card name glip/kpg/kpg.xplor.psf
+write psf  unit 10 card xplo 
+
+delete atom sele all end

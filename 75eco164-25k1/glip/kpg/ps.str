@@ -1,0 +1,30 @@
+* Polysaccharide unit generation stream file
+*
+
+read sequence card
+*  polysaccharide unit
+*
+ 1
+ BNE5AC
+
+generate ps1 first none last none setup warn
+
+if @{Nunit} .eq. 1 return
+
+calc i = 2
+label dogener
+
+read sequence card
+*  polysaccharide unit
+*
+ 1
+ ANE5AC
+
+generate ps@i first none last none setup warn
+
+calc j = @i - 1
+patch SA28AA ps@j 1 ps@i 1 setup warn
+
+increase i by 1
+if i .le. @{Nunit} goto dogener
+
