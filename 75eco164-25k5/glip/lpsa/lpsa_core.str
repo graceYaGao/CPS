@@ -1,0 +1,27 @@
+* LPS core generation stream file
+*
+
+read sequence card
+*  LPS core
+*
+ 10
+ AKDO AKDO AHEP AHEP AHEP 
+ AGLC AGLC AGAL AGAL BGLC 
+
+generate c1 first none last none setup warn
+
+patch SA24BB c1 1 c1 2 setup warn
+patch 15AA  c1 1 c1 3 setup warn
+patch 13AB  c1 3 c1 4 setup warn
+patch 17AT  c1 4 c1 5 setup warn
+patch 13AB  c1 4 c1 6 setup warn
+patch 13AB  c1 6 c1 7 setup warn
+patch 12AB  c1 7 c1 8 setup warn
+patch 12AB  c1 8 c1 9 setup warn
+patch 13BB  c1 7 c1 10 setup warn
+
+! Glycan chemical modifications
+patch 4BETPP c1 3 setup warn
+patch 4BPH c1 4 setup warn
+
+set nlpsacore = 10

@@ -1,0 +1,20 @@
+* KDO generation stream file
+*
+
+read sequence card
+*  KDO
+*
+ 8
+ BKDO BKDO BKDO BKDO BKDO BKDO BKDO BKDO
+
+generate KDO first none last none setup warn
+
+patch SA27BB KDO 1 KDO 2 setup warn
+patch SA24BA KDO 2 KDO 3 setup warn
+patch SA27BB KDO 3 KDO 4 setup warn
+patch SA24BA KDO 4 KDO 5 setup warn
+patch SA27BB KDO 5 KDO 6 setup warn
+patch SA24BA KDO 6 KDO 7 setup warn
+patch SA27BB KDO 7 KDO 8 setup warn
+
+set nkpgcore = 8
