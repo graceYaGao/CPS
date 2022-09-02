@@ -1,0 +1,35 @@
+* LPS o-antigen unit generation stream file
+*
+
+read sequence card
+*  LPS o-antigen unit
+*
+ 3
+ AMAN AMAN BMAN 
+
+generate o1 first none last none setup warn
+
+patch 12AA  o1 1 o1 2 setup warn
+patch 12BA  o1 2 o1 3 setup warn
+
+if @{Noanti} .eq. 1 return
+
+calc i = 2
+label dogener
+
+read sequence card
+*  LPS o-antigen unit
+*
+ 3
+ AMAN AMAN BMAN 
+
+generate o@i first none last none setup warn
+
+patch 12AA  o@i 1 o@i 2 setup warn
+patch 12BA  o@i 2 o@i 3 setup warn
+
+calc j = @i - 1
+patch 13AB O@j 3 O@i 1 setup warn
+
+increase i by 1
+if i .le. @{Noanti} goto dogener
