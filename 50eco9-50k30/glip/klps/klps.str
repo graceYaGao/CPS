@@ -1,0 +1,237 @@
+* Generate, IC build and energy of molecules in the
+* Lipid All-hydrogen topology and parameter files
+*
+
+set type = eclps
+set lipa = eclipa
+set oanti = kps
+set Noanti = 30
+set lpstype = @lipa_@{oanti}_@{Noanti}
+set no-oanti = no 
+
+!
+! generate lipid A
+!
+
+read sequence @lipa 1
+generate KLPS first none last none setup warn
+
+ic para
+ic seed 1 cb1 1 oa6 1 ca6
+ic build
+
+nbonds atom switch cdie vdw vfswitch  -
+       ctonnb 10.0 ctofnb 12.0 cutnb 14.0 cutim 14.0 -
+       inbfrq -1 imgfrq -1 wmin 1.0 cdie eps 80.0
+
+mini sd   nstep 100
+mini abnr nstep 100
+
+
+!
+! orient lipid A along Z
+!
+
+coor orient
+coor stat
+coor rotate ydir 1.0 phi 90
+coor stat select resname *lip* .and. type P* end
+set zp = ?zave
+coor stat select resname *lip* .and. type C%14 show end
+if ?zave .gt. @zp coor rotate ydir 1.0 phi 180
+coor stat select resname *lip* .and. type P* end
+coor trans zdir -?zave 
+coor trans zdir 20
+coor stat select resname *lip* end
+coor trans xdir -?xave ydir -?yave 
+coor stat
+coor stat select resname *lip* .and. type P* end
+coor stat select resname *lip* .and. type C%14 show end
+
+set mforce =   2.5
+set tforce =   2.5
+stream glip/klps/lps_restraint.str
+
+set fc2    =   250  ! dihedral restraint force constant to keep the chirality
+stream glip/klps/lps_restraint2.str
+
+scalar fbeta set  10.0 select all end
+
+DYNAMICS  start       nstep   5000  timestp  0.001 iprfrq   1000  nprint 1000  -
+          iasvel    1 firstt 300.0  finalt   300.0 tstruc  300.0  -
+          langevin    tbath  300.0  rbuf       0.0 -
+          inbfrq   -1 imgfrq    -1  ihbfrq       0 ilbfrq      0  -
+          iunread  -1  -
+          iunwrite -1  -
+          iuncrd   -1 nsavcrd    0  -
+          iunvelo  -1 nsavvelo   0  -
+          kunit    -1  
+
+!
+! generate and connect the o-antigen to the core
+!
+
+if @{no-oanti} .eq. no then
+    stream glip/klps/lps_oanti.str 
+    patch LP16BT KLPS 1 O1 1 setup warn
+endif
+
+!
+! join everything to a single KLPS segment
+!
+
+if @{no-oanti} .eq. no then
+    calc i = 1
+    label dojoin
+        join KLPS O@i renumber
+    increase i by 1
+    if i .le. @{Noanti} goto dojoin
+endif
+
+autogenerate angle dihe ! only once here for core and O-antigen
+
+ic para
+ic build
+
+cons fix sele .not. hydrogen end
+mini sd   nstep 100
+mini abnr nstep 100
+cons fix sele none end
+
+set fring  = 250 ! dihedral restraint force constant to keep the sugar chair conformation
+set cimpr  = 250  ! improper restraint force constant to keep the sugar chirality
+stream glip/klps/lps_restraint3.str
+stream glip/klps/carbohydrate_improper_restraint.str
+
+nbonds atom switch cdie vdw vfswitch  -
+       ctonnb 10.0 ctofnb 12.0 cutnb 14.0 cutim 14.0 -
+       inbfrq -1 imgfrq -1 wmin 1.0 cdie eps 80.0
+
+MMFP
+GEO reset
+END
+
+set ires = 2
+define ROT sele none end
+label define_rot
+   define XXX sele .bonded. ires @ires .and. .not. ires @ires .and. type O* end
+   define YYY sele XXX .or. .bonded. XXX .and. .not. hydrogen end
+   define ROT sele ROT .or. YYY end
+increase ires by 1
+if ires .le. ?nres goto define_rot
+
+coor copy comp sele resname *lip* end
+
+energy
+
+MOVE ADD MVTP TORS DMAX 360.0 SELE ROT END
+MC NSTEP 3000 INBFrq 1 IECHeck 1
+MOVE DELETE MVIN 1
+
+coor orient rms sele resname *lip* end
+
+mini sd   nstep 100
+mini abnr nstep 100
+
+energy
+
+!
+! make core and o-antigen linear
+!
+
+! with Z-restraints
+
+coor stat sele resid 2 end
+set zref = ?zave
+
+set ires = 3    ! lipid A is resid 1
+label do_zres
+
+   calc zref = @zref + 5
+
+   MMFP
+   GEO plane  RCM -
+       xref 0.0  yref 0.0  zref  @zref  zdir 1.0 -
+       force 5.0 select resid @ires show end
+   END
+
+increase ires by 1
+if ires .le. ?nres goto do_zres
+
+cons fix sele resid 1 end
+
+calc nstep = 1000 + 400 * @{Noanti}
+mini sd   nstep @nstep nprint 10
+mini abnr nstep @nstep nprint 10
+
+scalar fbeta set  10.0 select all end
+
+DYNAMICS  start       nstep  100000  timestp  0.001 iprfrq   1000  nprint 1000  -
+          iasvel    1 firstt 300.0  finalt   300.0 tstruc  300.0  -
+          langevin    tbath  300.0  rbuf       0.0 -
+          inbfrq   -1 imgfrq    -1  ihbfrq       0 ilbfrq      0  -
+          iunread  -1  -
+          iunwrite -1  -
+          iuncrd   -1 nsavcrd    0  -
+          iunvelo  -1 nsavvelo   0  -
+          kunit    -1  
+
+! with cylindrical restraints
+
+MMFP
+GEO reset
+
+GEO cylinder -
+    Xref 0.0 Yref 0.0 Zref 0.0 XDIR 0.0 YDIR 0.0 ZDIR 1.0 -
+    harmonic FORCE 5.0 droff 5.0 select .not. hydrogen end
+END
+
+cons fix sele none end
+
+calc nstep = 500 + 200 * @{Noanti}
+mini sd   nstep @nstep nprint 10
+mini abnr nstep @nstep nprint 10
+
+scalar fbeta set  10.0 select all end
+
+DYNAMICS  start       nstep   5000  timestp  0.001 iprfrq   1000  nprint 1000  -
+          iasvel    1 firstt 300.0  finalt   300.0 tstruc  300.0  -
+          langevin    tbath  300.0  rbuf       0.0 -
+          inbfrq   -1 imgfrq    -1  ihbfrq       0 ilbfrq      0  -
+          iunread  -1  -
+          iunwrite -1  -
+          iuncrd   -1 nsavcrd    0  -
+          iunvelo  -1 nsavvelo   0  -
+          kunit    -1  
+
+coor init sele hydrogen end
+prnlev 0
+hbuild
+prnlev 5
+
+!
+! single KLPS psf & crd
+!
+
+label writeinfo
+
+energy
+
+open write unit 10 card name glip/klps/klps.psf
+write psf  unit 10 card
+
+open write unit 10 card name glip/klps/klps.pdb
+write coor unit 10 pdb
+
+open write unit 10 card name glip/klps/klps.crd
+write coor unit 10 card
+
+open write unit 10 card name glip/klps/klps.xplor_ext.psf
+write psf  unit 10 card xplo 
+
+ioformat noext
+open write unit 10 card name glip/klps/klps.xplor.psf
+write psf  unit 10 card xplo 
+ioformat ext
+
+delete atom sele all end

@@ -1,0 +1,219 @@
+read rtf card append
+* glycan chemical modification patches
+*
+41 1
+
+RESI BKDO          -1.000  ! 3-deoxy-beta-D-mannooctulosonic acid 
+                           !
+GROUP			   !
+ATOM C1   CC2O2     0.300  !
+ATOM O11  OC2D2    -0.600  !
+ATOM O12  OC2D2    -0.600  !
+ATOM C2   CC3062    0.330  !
+ATOM O2   OC311    -0.650  !		      H82       
+ATOM HO2  HCP1      0.420  !		      |
+ATOM C6   CC3163    0.110  !              H81-C8-O8-HO8
+ATOM H6   HCA1      0.090  !                  |
+ATOM O6   OC3C61   -0.400  !               H7-C7-O7-HO7
+GROUP			           !                  |
+ATOM C3   CC3261   -0.180  !               H6-C6---O6
+ATOM H31  HCA2      0.090  !        HO5-O5   /       \    O2-HO2
+ATOM H32  HCA2      0.090  !              \ / HO4     \  /
+GROUP                      !               C5 |        C2
+ATOM C4   CC3161    0.140  !              / \ O4  H31 /  \
+ATOM H4   HCA1      0.090  !            H5   \|    | /    C1=O11
+ATOM O4   OC311    -0.650  !                  C4---C3     |
+ATOM HO4  HCP1      0.420  !                  |    |      O12 (-)
+GROUP                      !                  H4   H32
+ATOM C5   CC3161    0.140  !
+ATOM H5   HCA1      0.090  !
+ATOM O5   OC311    -0.650  !
+ATOM HO5  HCP1      0.420  !
+GROUP			   !
+ATOM C7   CC312     0.140  !
+ATOM H7   HCA1      0.090  !
+ATOM O7   OC311    -0.650  !
+ATOM HO7  HCP1      0.420
+GROUP
+ATOM C8   CC322     0.050
+ATOM H81  HCA2      0.090
+ATOM H82  HCA2      0.090
+ATOM O8   OC311    -0.650
+ATOM HO8  HCP1      0.420
+!
+BOND C1   O12       C1   C2        C2   O2        O2   HO2       C2   C3
+DOUBLE C1 O11
+BOND C3   H31       C3   H32       C3   C4        C4   H4        C4   O4
+BOND O4   HO4       C4   C5        C5   H5        C5   O5        O5   HO5
+BOND C5   C6        C6   H6	   C6   O6        C6   C7        C7   H7
+BOND C7   O7        O7   HO7       C7   C8        C8   O8        O8   HO8
+BOND C8   H81       C8   H82       C2   O6
+
+!    I    J    K    L      R(IK)   T(IKJ)    PHI   T(JKL)   R(KL)
+IC   C3   C2   C1   O11    1.5619  111.05  -77.60  119.02   1.2616
+IC   O11  C2   *C1  O12    1.2616  119.02 -179.50  121.11   1.2984
+IC   C1   O6   *C2  O2     1.5186  109.23  105.50  109.17   1.4161
+IC   C1   C3   *C2  O6     1.5186  111.05  127.60  106.37   1.4582
+IC   O2   C3   *C2  C1     1.4161  107.78 -117.00  111.05   1.5186
+IC   O2   O6   *C2  C3     1.4161  109.17  130.20  106.37   1.5619
+IC   H32  C4   *C3  H31    1.1518  105.79 -113.53  113.61   1.0664
+IC   H32  C2   *C3  C4     1.1518  107.90 -115.20  110.46   1.5015
+IC   O4   C5   *C4  H4     1.4266  109.02  118.09  104.61   1.1300
+IC   O4   C3   *C4  C5     1.4266  116.32  123.96  109.32   1.5156
+IC   O5   C6   *C5  H5     1.4233  107.75  119.05  111.86   1.0818
+IC   O5   C4   *C5  C6     1.4233  111.62  121.16  112.36   1.4931
+IC   C7   O6   *C6  H6     1.5469   98.17  110.20  110.29   1.1144
+IC   C7   C5   *C6  O6     1.5469  117.84  122.10  112.18   1.4591
+IC   O7   C6   *C7  H7     1.4547  112.17  120.10  107.29   1.0967
+IC   O6   C2   C3   C4     1.4582  106.37   56.29  110.46   1.5015
+IC   C2   C3   C4   C5     1.5619  110.46  -54.01  116.23   1.5290
+IC   C3   C4   C5   C6     1.5015  116.23   45.40  110.25   1.5662
+IC   C4   C5   C6   O6     1.5290  110.25  -41.71  112.18   1.4591
+IC   C5   C6   O6   C2     1.5662  112.18   53.68  118.46   1.4582
+IC   C6   O6   C2   C3     1.4591  118.46  -59.57  106.37   1.5619
+IC   C5   C6   C7   O7     1.5662  117.84  -57.90  112.17   1.4547
+IC   O6   C2   O2   HO2    1.4582  109.17 -127.77   93.37   0.9583
+IC   C3   C4   O4   HO4    1.5015  108.53  -15.40  104.02   0.9570
+IC   C4   C5   O5   HO5    1.5156  111.62  -23.31  104.57   0.9949
+IC   C6   C7   O7   HO7    1.5469  112.17   40.70  107.40   0.9933
+IC   C5   C6   C7   C8     1.5662  117.84 -155.80  112.77   1.5048 
+IC   O7   C8   *C7  C6     1.4013  101.88  122.40  112.05   1.5048
+IC   O7   C7   C8   O8     1.4013  101.88   81.70  111.96   1.4627
+IC   O7   C8   *C7  H7     1.4013  101.88 -112.70  110.59   1.1012
+IC   C8   C7   O7   HO7    1.5476  101.88  -15.62  104.31   0.9826
+IC   O8   C7   *C8  H81    1.4627  111.96  118.36  111.56   1.0985
+IC   O8   C7   *C8  H82    1.4627  111.96 -119.14  103.21   1.1787
+IC   C7   C8   O8   HO8    1.5476  111.96  169.63  111.06   0.9538
+PATC FIRS NONE LAST NONE
+
+PRES SA25BA          0.01 ! NE5AC 2->5 KDO
+dele atom 1HO5            ! based on 14AA
+dele atom 2HO2
+dele atom 2O2
+ATOM 1C5  CC3161    0.09 !
+ATOM 1O5  OC301    -0.36 !
+ATOM 2C2  CC3062    0.28 !
+BOND 1O5  2C2
+!    I    J    K    L      R(IK)   T(IKJ)    PHI   T(JKL)   R(KL)
+IC   1C4  1C5  1O5  2C2    1.5075  110.40 -125.00  119.44   1.4036  ! psi
+IC   1C5  1O5  2C2  2O6    1.4716  119.44   22.00  109.48   1.4490  ! phi
+IC   1O5  2O6 *2C2  2C3    1.4040  109.47  149.93  111.51   1.4792
+
+PRES SA27BB         0.01 ! KDO 2->7 KDO (from SA28AA)
+dele atom 1HO7
+dele atom 2HO2
+dele atom 2O2
+ATOM 1C7   CC312   -0.04 !
+ATOM 1O7   OC301   -0.40 !
+ATOM 2C2   CC3062   0.45 !
+BOND 1O7 2C2
+!    I    J    K    L      R(IK)   T(IKJ)    PHI   T(JKL)   R(KL)
+IC   1C8  1C7  1O7  2C2    1.5146  103.91  -48.41  117.34   1.4702
+IC   1C7  1O7  2C2  2O6    1.4260  117.34   61.49  115.50   1.4426
+IC   1O7  2O6 *2C2  2C3    1.4702  115.51  105.69  112.31   1.4361
+
+PRES 13APG         -0.07 ! (i)1->3(i-1) axial at C1 and C3 of PG lipid
+dele atom 1HO3
+dele atom 2HO1
+dele atom 2O1
+ATOM 1C13  CTO2     0.00 ! from patch DAGA
+ATOM 1OC3  OC301   -0.36 ! from patch DAGA
+ATOM 2C1   CC3162   0.29 ! from patch DAGA
+BOND 1OC3 2C1
+!    I    J    K    L      R(IK)   T(IKJ)    PHI   T(JKL)   R(KL)
+IC  1C12  1C13  1OC3   2C1    1.5616  105.37  172.71  113.93   1.3902 ! PSI
+IC  1C13  1OC3   2C1   2O5    1.4311  113.93  -63.49  108.63   1.4110 ! PHI
+IC  1OC3  2O5   *2C1   2C2    1.3902  108.64 -122.04  110.86   1.5326
+IC  2O5   1OC3  *2C1   2H1    1.4110  108.63 -121.92  111.32   1.0837
+
+PRES LK23B         -0.06 ! (i)2->3(i-1) equitorial at C2 and C3 of PG lipid
+dele atom 1HO3
+dele atom 2HO2
+dele atom 2O2
+ATOM 1C13  CTO2     0.00 ! from patch DAGA
+ATOM 1OC3  OC301   -0.36 ! from patch DAGA
+ATOM 2C2   CC3062   0.28 ! from patch SA23AB
+BOND 1OC3 2C2
+!    I    J    K    L      R(IK)   T(IKJ)    PHI   T(JKL)   R(KL)
+IC  1C12  1C13  1OC3   2C2    1.5616  105.37  172.71  113.93   1.3902 ! PSI
+IC  1C13  1OC3   2C2   2O6    1.4311  113.93  -63.49  108.63   1.4110 ! PHI
+IC  1OC3  2O6   *2C2   2C3    1.3902  108.64  122.04  110.86   1.5326
+
+! equatorial-equatorial 1->6 linkage
+PRES LP16BT        -0.07 ! (i)1->6(i-1) equatorial at C1 and equatorial at C6
+dele atom 1HOB6
+dele atom 2HO1
+dele atom 2O1
+ATOM 1CB6  CC321    0.00 !
+ATOM 1OB6  OC301   -0.36 !
+ATOM 2C1   CC3162   0.29 !
+BOND 1OB6 2C1
+!    I    J    K    L      R(IK)   T(IKJ)    PHI   T(JKL)   R(KL)
+IC  1CB5 1CB6 1OB6  2C1    1.5616  105.37  172.71  113.93   1.3902 ! PSI
+IC  1CB6 1OB6  2C1  2O5    1.4311  113.93  -63.49  108.63   1.4110 ! PHI
+IC  1OB6  2O5 *2C1  2C2    1.3896  108.67  122.13  110.86   1.5323
+IC   2O5 1OB6 *2C1  2H1    1.4110  108.63  121.92  111.32   1.0837
+
+END
+
+read param card flex append
+* glycan chemical modification patches
+*
+
+BONDS
+
+
+!****************** ANGLES ************
+ANGLES
+!V(angle) = Ktheta(Theta - Theta0)**2
+!V(Urey-Bradley) = Kub(S - S0)**2
+!Ktheta: kcal/mole/rad**2
+!Theta0: degrees
+!Kub: kcal/mole/A**2 (Urey-Bradley)
+!S0: A
+!
+! atom types             Ktheta  Theta0   Kub    S0
+
+CTO2    CTL1    OHL      75.70   108.00  ! adm 11/08, glycerol
+CC3062  OC301   CTO2     95.00   109.70  ! par35 CC33A  OC30A CC32A
+
+
+! ******** V(dihedral) = Kchi(1 + cos(n(chi) - delta))
+DIHEDRALS
+
+CC3062  OC301   CTO2    CTL1     0.40  1    0.0 ! par35
+CC3062  OC301   CTO2    CTL1     0.49  3    0.0 !  " CC33A CC32A OC30A CC32A
+CC3C61  CC3062  OC301   CTO2     0.22  1    0.0 ! og OMeTHP compounds 2 and 3
+CC3C61  CC3062  OC301   CTO2     0.28  2  180.0 ! "  MCSA fit
+CC3C61  CC3062  OC301   CTO2     0.89  3    0.0 ! "  MP2/cc-pVTZ//MP2/6-31G*
+CC3261  CC3062  OC301   CTO2     0.22  1    0.0 ! og OMeTHP compounds 2 and 3
+CC3261  CC3062  OC301   CTO2     0.28  2  180.0 ! "  MCSA fit
+CC3261  CC3062  OC301   CTO2     0.89  3    0.0 ! "  MP2/cc-pVTZ//MP2/6-31G*
+CC3062  OC301   CTO2    HAL2     0.284 3    0.0 ! par35 HCA2 CC32A OC30A CC32A
+CTO2    OC301   CC3062  OC3C61   0.14  1    0.0 ! og OMeTHP compounds 2 and 3
+CTO2    OC301   CC3062  OC3C61   0.97  2    0.0 ! "  MCSA fit
+CTO2    OC301   CC3062  OC3C61   0.11  3  180.0 ! "  MP2/cc-pVTZ//MP2/6-31G*
+CC3163  CC312   OC301   CC3062   0.64  1  180.0 ! from CC3163  CC321   OC301   CC3162
+CC3163  CC312   OC301   CC3062   0.03  2  180.0 ! "
+CC3163  CC312   OC301   CC3062   0.61  3    0.0 ! "
+
+!!! parameters need to be changed
+CC2O2   CC3062  OC301   CTO2     0.22  1    0.0 ! og OMeTHP compounds 2 and 3
+CC2O2   CC3062  OC301   CTO2     0.28  2  180.0 ! "  MCSA fit
+CC2O2   CC3062  OC301   CTO2     0.89  3    0.0 ! "  MP2/cc-pVTZ//MP2/6-31G*
+
+IMPROPER
+!
+!V(improper) = Kpsi(psi - psi0)**2
+!
+!Kpsi: kcal/mole/rad**2
+!psi0: degrees
+!
+!atom types                     Kpsi         psi0
+
+NONBONDED  NBXMOD 5  ATOM CDIEL FSHIFT VATOM VDISTANCE VFSWITCH -
+     CUTNB 14.0  CTOFNB 12.0  CTONNB 10.0  EPS 1.0  E14FAC 1.0  WMIN 1.5
+
+END 
+
+RETURN
